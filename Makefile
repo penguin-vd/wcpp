@@ -1,6 +1,6 @@
 CXX = g++
 
-CXXFLAGS = -Wall -Wextra -g
+CXXFLAGS = -Wall -g
 
 SRCS = main.cpp 
 
