@@ -11,7 +11,6 @@ MAIN = $(BUILD_DIR)/wcpp
 .PHONY: depend clean run
 
 all:    $(MAIN)
-	@echo Compilation Finished
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
