@@ -1,34 +1,26 @@
-# Define the compiler to use
 CXX = g++
 
-# Define any compile-time flags
 CXXFLAGS = -Wall -Wextra -g
 
-# Define the C++ source files
 SRCS = main.cpp 
 
-# Define the C++ object files 
-OBJS = $(SRCS:.cpp=.o)
+BUILD_DIR = build
 
-# Define the executable file 
-MAIN = wcpp
+MAIN = $(BUILD_DIR)/wcpp
 
 .PHONY: depend clean run
 
 all:    $(MAIN)
-	@echo  $(MAIN) has been compiled
+	@echo Compilation Finished
 
-$(MAIN): $(OBJS) 
-	$(CXX) $(CXXFLAGS) -o $(MAIN) $(OBJS)
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -c $<  -o $@
+$(MAIN): $(OBJS) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o $(MAIN) $(SRCS)
 
 clean:
-	$(RM) *.o *~ $(MAIN)
-
-run: $(MAIN)
-	./$(MAIN)
+	$(RM) -r $(BUILD_DIR)
 
 depend: $(SRCS)
 	makedepend $^
