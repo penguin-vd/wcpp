@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iterator>
@@ -26,6 +27,8 @@ struct parameters {
         bytes = true;
         lines = true;
         words = true;
+        max_line_length = false;
+        chars = false;
     }
 };
 
@@ -105,25 +108,68 @@ std::string parse_file(const std::string& filename, parameters params) {
 }
 
 bool parse_args(int argc, char* argv[], parameters* params, std::string* filename) {
-    bool found_arg = false;
+    bool isdef = true;
 
     for (int i = 1; i < argc; ++i) {
         char* arg = argv[i];
-        if (strcmp(arg, "-c") == 0 || strcmp(arg, "--bytes") == 0) {
-            params->bytes = true;
-        } else if (strcmp(arg, "-m") == 0 || strcmp(arg, "--chars") == 0) {
-            params->chars = true;
-        } else if (strcmp(arg, "-l") == 0 || strcmp(arg, "--lines") == 0) {
-            params->lines = true;
-        } else if (strcmp(arg, "-L") == 0 || strcmp(arg, "--max-line-length") == 0) {
-            params->max_line_length = true;
-        } else if (strcmp(arg, "-w") == 0 || strcmp(arg, "--words") == 0) {
-            params->words = true;
-        } else {
+        
+        // check if it is a file or dir
+        if (arg[0] != '-') {
             if (*filename != "") {
                 return false;
             }
             *filename = arg;
+            continue;
+        }
+        
+        if (isdef) {
+            params->reset();
+            isdef = false;
+        }
+
+        // check if it is a full param
+        if (arg[1] == '-') {
+            if (strcmp(arg, "--bytes") == 0 ) {
+                params->bytes = true;
+            } else if (strcmp(arg, "--lines") == 0) {
+                params->lines = true;
+            } else if (strcmp(arg, "--chars") == 0) {
+                params->chars = true;
+            } else if (strcmp(arg, "--words") == 0) {
+                params->words = true;
+            } else if (strcmp(arg, "--max-line-length") == 0) {
+                params->max_line_length = true;
+            } else if (strcmp(arg, "--help") == 0) {
+                print_args(argv[0]);
+                exit(0);
+            } else if (strcmp(arg, "--version") == 0) {
+                // print version
+                exit(0);
+            } else {
+                return false;
+            }
+            
+            continue;
+        }
+
+        // parse short params
+        int x = 1;
+        while (arg[x]) {
+            if (arg[x] == 'c') {
+                params->bytes = true;
+            } else if (arg[x] == 'm') {
+                params->chars = true;
+            } else if (arg[x] == 'l') {
+                params->lines = true;
+            } else if (arg[x] == 'L') {
+                params->max_line_length -= true;
+            } else if (arg[x] == 'w') {
+                params->words = true;
+            } else {
+                return false;
+            }
+
+            x++;
         }
     }
 
@@ -137,7 +183,7 @@ int main(int argc, char* argv[]) {
     }
     
     parameters params;
-    params.reset();
+    params.def();
         
     std::string filename;
     if (!parse_args(argc, argv, &params, &filename)) {
@@ -151,7 +197,7 @@ int main(int argc, char* argv[]) {
         print_args(argv[0]);
         return 1;
     }
-    printf(parse_file(filename, params).c_str());
+    printf("%s", parse_file(filename, params).c_str());
     return 0;
 }
 
