@@ -31,7 +31,16 @@ struct parameters {
 
 void print_args(char* name) {
     printf("Usage: %s [OPTIONS]... [FILE]\n", name);
-    printf("Usage: %s [OPTIONS]... [DIR]\n", name);
+    printf("   or: %s [OPTIONS]... [DIR]\n", name);
+    
+    printf("\n\n");
+    printf("  -c, --bytes\t\tprint the byte counts\n");
+    printf("  -m, --chars\t\tprint the character counts\n");
+    printf("  -l, --lines\t\tprint the newline counts\n");
+    printf("  -L, --max-line-length\tprint the maximum display width\n");
+    printf("  -w, --words\t\tprint the word counts\n");
+    printf("      --help\t\tprint this help information and exit\n");
+    printf("      --version\t\tprint version information and exit\n");
 }
 
 bool file_exists(const std::string& name) {
@@ -96,14 +105,9 @@ std::string parse_file(const std::string& filename, parameters params) {
 }
 
 bool parse_args(int argc, char* argv[], parameters* params, std::string* filename) {
-    if (argc == 1) {
-        params->def();
-        return true;
-    }
+    bool found_arg = false;
 
     for (int i = 1; i < argc; ++i) {
-
-        // cannot parse -wyc
         char* arg = argv[i];
         if (strcmp(arg, "-c") == 0 || strcmp(arg, "--bytes") == 0) {
             params->bytes = true;
