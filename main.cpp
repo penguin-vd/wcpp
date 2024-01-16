@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <fstream>
 #include <iterator>
 #include <sstream>
@@ -54,7 +55,8 @@ bool file_exists(const std::string& name) {
 int get_word_count(const std::string& str) {
     std::istringstream iss(str);    
     std::vector<std::string> words;
-
+    
+    // c++ magic
     std::copy(std::istream_iterator<std::string>(iss),
             std::istream_iterator<std::string>(),
             std::back_inserter(words));
@@ -65,20 +67,34 @@ int get_word_count(const std::string& str) {
 std::string parse_file(const std::string& filename, parameters params) {
     std::string res = "";
     std::string line;
-    std::ifstream File(filename);
+    std::ifstream File(filename, std::ios::binary);
     
     int lines = 0;
     int words = 0;
     int chars = 0;
     int max_line_length = 0;
+    int bytes = 0;
+
+    if (params.bytes) {
+        File.seekg(0, std::ios::end);
+        int bytes = File.tellg();
+        File.seekg(0, std::ios::beg);
+    }
+
     while (getline(File, line)) {
         lines++;
-        words += get_word_count(line);
-        chars += line.length(); // not good
+        chars += line.length();
+
+        if (params.words) {
+            words += get_word_count(line);
+        }
+
         if (line.length() > max_line_length) {
             max_line_length = line.length();
         }
     }
+
+    File.close();
 
     res += filename + " ";
     
@@ -99,7 +115,7 @@ std::string parse_file(const std::string& filename, parameters params) {
     }
 
     if (params.bytes) {
-        res += "Bytes: " + std::to_string(0) + " "; // this aint it chief
+        res += "Bytes: " + std::to_string(bytes) + " ";
     }
 
     res += "\n";
