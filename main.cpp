@@ -1,37 +1,12 @@
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <sstream>
-#include <vector>
 #include <sys/stat.h>
 #include <string>
+#include "parse_file.h"
 
-struct parameters { 
-    bool bytes;
-    bool chars;
-    bool lines;
-    bool max_line_length;
-    bool words;
-    
-    void reset() {
-        bytes = false;
-        chars = false;
-        lines = false;
-        max_line_length = false;
-        words = false;
-    }
-
-    void def() {
-        bytes = true;
-        lines = true;
-        words = true;
-        max_line_length = false;
-        chars = false;
-    }
-};
+using namespace std;
 
 void print_args(char* name) {
     printf("Usage: %s [OPTIONS]... [FILE]\n", name);
@@ -47,89 +22,17 @@ void print_args(char* name) {
     printf("      --version\t\tprint version information and exit\n");
 }
 
-bool file_exists(const std::string& name) {
+bool file_exists(const string& name) {
     struct stat buffer;
     return (stat (name.c_str(), &buffer) == 0);
 }
 
-int get_word_count(const std::string& str) {
-    std::istringstream iss(str);    
-    std::vector<std::string> words;
-    
-    // c++ magic
-    std::copy(std::istream_iterator<std::string>(iss),
-            std::istream_iterator<std::string>(),
-            std::back_inserter(words));
-
-    return words.size();
-}
-
-std::string parse_file(const std::string& filename, parameters params) {
-    std::string res = "";
-    std::string line;
-    std::ifstream File(filename, std::ios::binary);
-    
-    int lines = 0;
-    int words = 0;
-    int chars = 0;
-    int max_line_length = 0;
-    int bytes = 0;
-
-    if (params.bytes) {
-        File.seekg(0, std::ios::end);
-        int bytes = File.tellg();
-        File.seekg(0, std::ios::beg);
-    }
-
-    while (getline(File, line)) {
-        lines++;
-        chars += line.length();
-
-        if (params.words) {
-            words += get_word_count(line);
-        }
-
-        if (line.length() > max_line_length) {
-            max_line_length = line.length();
-        }
-    }
-
-    File.close();
-
-    res += filename + " ";
-    
-    if (params.lines) {
-        res += "Lines: " + std::to_string(lines) + " ";
-    }
-
-    if (params.max_line_length) {
-        res += "Max Width Line: " + std::to_string(max_line_length) + " ";
-    }
-
-    if (params.words) {
-        res += "Words: " + std::to_string(words) + " ";
-    }
-
-    if (params.chars) {
-        res += "Chars: " + std::to_string(chars) + " ";
-    }
-
-    if (params.bytes) {
-        res += "Bytes: " + std::to_string(bytes) + " ";
-    }
-
-    res += "\n";
-
-    return res;
-}
-
-bool parse_args(int argc, char* argv[], parameters* params, std::string* filename) {
+bool parse_args(int argc, char* argv[], parameters* params, string* filename) {
     bool isdef = true;
 
     for (int i = 1; i < argc; ++i) {
         char* arg = argv[i];
         
-        // check if it is a file or dir
         if (arg[0] != '-') {
             if (*filename != "") {
                 return false;
@@ -143,7 +46,6 @@ bool parse_args(int argc, char* argv[], parameters* params, std::string* filenam
             isdef = false;
         }
 
-        // check if it is a full param
         if (arg[1] == '-') {
             if (strcmp(arg, "--bytes") == 0 ) {
                 params->bytes = true;
@@ -168,7 +70,6 @@ bool parse_args(int argc, char* argv[], parameters* params, std::string* filenam
             continue;
         }
 
-        // parse short params
         int x = 1;
         while (arg[x]) {
             if (arg[x] == 'c') {
@@ -201,7 +102,7 @@ int main(int argc, char* argv[]) {
     parameters params;
     params.def();
         
-    std::string filename;
+    string filename;
     if (!parse_args(argc, argv, &params, &filename)) {
         printf("ERROR: wrong usage of arguments.\n\n");
         print_args(argv[0]);
@@ -213,7 +114,17 @@ int main(int argc, char* argv[]) {
         print_args(argv[0]);
         return 1;
     }
-    printf("%s", parse_file(filename, params).c_str());
+
+    array<int, 5> res = parse_file(filename, params);
+        
+    for (auto a : res) {
+        if (a > 0) {
+            printf("%i  ", a);
+        }
+    }
+    printf("%s", filename.c_str());
+    printf("\n");
+
     return 0;
 }
 

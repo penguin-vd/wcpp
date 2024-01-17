@@ -1,9 +1,6 @@
 CXX = g++
-
 CXXFLAGS = -Wall -g
-
-SRCS = main.cpp 
-
+SRCS = main.cpp parse_file.cpp
 BUILD_DIR = build
 
 MAIN = $(BUILD_DIR)/wcpp
