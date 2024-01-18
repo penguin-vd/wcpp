@@ -24,7 +24,6 @@ void print_args(char* name) {
     printf("      --filter STRING\tfilter the files when going through a directory\n");
     printf("         e.g. .cpp,.h\n\n");
     printf("      --help\t\tprint this help information and exit\n");
-    printf("      --version\t\tprint version information and exit\n");
 }
 
 bool file_exists(const string& name) {
@@ -97,9 +96,6 @@ bool parse_args(int argc, char* argv[], parameters* params, string* filename) {
                 i++;
             } else if (strcmp(arg, "--help") == 0) {
                 print_args(argv[0]);
-                exit(0);
-            } else if (strcmp(arg, "--version") == 0) {
-                // print version
                 exit(0);
             } else {
                 return false;

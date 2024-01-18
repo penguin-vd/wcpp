@@ -18,6 +18,4 @@ Usage: ./wcpp [OPTIONS]... [FILE]
          e.g. .cpp,.h
 
       --help		print this help information and exit
-      --version		print version information and exit
-
 ```
