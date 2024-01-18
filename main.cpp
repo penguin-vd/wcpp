@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <string>
 #include "parse_file.h"
+#include "parse_dir.h"
 
 using namespace std;
 
@@ -18,6 +19,10 @@ void print_args(char* name) {
     printf("  -l, --lines\t\tprint the newline counts\n");
     printf("  -L, --max-line-length\tprint the maximum display width\n");
     printf("  -w, --words\t\tprint the word counts\n");
+    printf("  -r, --recursive\trecursively parse through a directory\n");
+    printf("  -s, --sum\t\tsum all information of a directory\n");
+    printf("      --filter STRING\tfilter the files when going through a directory\n");
+    printf("         e.g. .cpp,.h\n\n");
     printf("      --help\t\tprint this help information and exit\n");
     printf("      --version\t\tprint version information and exit\n");
 }
@@ -25,6 +30,27 @@ void print_args(char* name) {
 bool file_exists(const string& name) {
     struct stat buffer;
     return (stat (name.c_str(), &buffer) == 0);
+}
+
+void parse_filter(char* filter, parameters* params) {
+    std::string f = "";
+    
+    int i = 0;
+    while (filter[i]) {
+        if (filter[i] == ',') {
+            if (f != "") {
+                params->filter.push_back(f);
+                f = "";
+            }
+        } else {
+            f += filter[i];
+        }
+
+        ++i;
+    } 
+    if (f != "") {
+        params->filter.push_back(f);
+    }
 }
 
 bool parse_args(int argc, char* argv[], parameters* params, string* filename) {
@@ -57,6 +83,18 @@ bool parse_args(int argc, char* argv[], parameters* params, string* filename) {
                 params->words = true;
             } else if (strcmp(arg, "--max-line-length") == 0) {
                 params->max_line_length = true;
+            } else if (strcmp(arg, "--recursive") == 0) {
+                params->recursive = true;
+            } else if (strcmp(arg, "--sum") == 0) {
+                params->sum = true;
+            } else if (strcmp(arg, "--filter") == 0) {
+                params->hasfilter = true;
+                if (!argv[i+1]) {
+                    return false;
+                }
+
+                parse_filter(argv[i+1], params);
+                i++;
             } else if (strcmp(arg, "--help") == 0) {
                 print_args(argv[0]);
                 exit(0);
@@ -82,6 +120,10 @@ bool parse_args(int argc, char* argv[], parameters* params, string* filename) {
                 params->max_line_length -= true;
             } else if (arg[x] == 'w') {
                 params->words = true;
+            } else if (arg[x] == 'r') {
+                params->recursive = true;
+            } else if (arg[x] == 's') {
+                params->sum = true;
             } else {
                 return false;
             }
@@ -115,15 +157,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    array<int, 5> res = parse_file(filename, params);
-        
-    for (auto a : res) {
-        if (a > 0) {
-            printf("%i  ", a);
+    if (is_dir(filename)) {
+        if (params.sum) {
+            print_res(sum_dir(filename, params), filename);
+            return 0;
         }
+        parse_dir(filename, params);
+        return 0;
     }
-    printf("%s", filename.c_str());
-    printf("\n");
+
+    print_res(parse_file(filename, params), filename);
+           
 
     return 0;
 }

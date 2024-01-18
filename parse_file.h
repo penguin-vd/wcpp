@@ -1,9 +1,10 @@
 #ifndef PARSE_FILE_H
 #define PARSE_FILE_H
-#include <array>
 #endif
 
 #include <string>
+#include <array>
+#include <vector>
 
 using namespace std;
 
@@ -13,6 +14,10 @@ struct parameters {
     bool lines;
     bool max_line_length;
     bool words;
+    bool recursive;
+    bool sum;
+    bool hasfilter;
+    vector<string> filter;
     
     void reset() {
         bytes = false;
@@ -20,6 +25,10 @@ struct parameters {
         lines = false;
         max_line_length = false;
         words = false;
+        recursive = false;
+        sum = false;
+        hasfilter = false;
+        filter = {};
     }
 
     void def() {
@@ -28,6 +37,10 @@ struct parameters {
         words = true;
         max_line_length = false;
         chars = false;
+        recursive = false;
+        sum = false;
+        hasfilter = false;
+        filter = {};
     }
 };
 
